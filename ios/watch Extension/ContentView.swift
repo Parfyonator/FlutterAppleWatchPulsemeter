@@ -12,13 +12,19 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            Text("Counter: \(viewModel.counter)")
+            Text("HBPM: \(viewModel.counter)").font(.system(size: 22, weight: .light, design: .default))
                 .padding()
             Button(action: {
-                viewModel.sendDataMessage(for: .sendCounterToFlutter, data: ["counter": viewModel.counter + 1])
+                viewModel.endWorkout()
+                exit(EXIT_SUCCESS)
             }) {
-                Text("+ by 2")
+                Text("Exit")
             }
+//            Button(action: {
+//                viewModel.sendDataMessage(for: .sendCounterToFlutter, data: ["counter": viewModel.heartReate])
+//            }) {
+//                Text("Update heartbeat")
+//            }
         }
         
         

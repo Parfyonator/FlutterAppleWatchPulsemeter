@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/type/quantity_type.dart';
+import 'package:health_kit_reporter/model/type/series_type.dart';
+import 'package:health_kit_reporter/model/update_frequency.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -103,35 +108,47 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: FutureBuilder<Object>(
+        future: appReady(),
+        builder: (context, snapshot) {
+          if( snapshot.hasData && snapshot.data == true ) {
+            return Center(
+              // Center is a layout widget. It takes a single child and positions it
+              // in the middle of the parent.
+              child: Column(
+                // Column is also a layout widget. It takes a list of children and
+                // arranges them vertically. By default, it sizes itself to fit its
+                // children horizontally, and tries to be as tall as its parent.
+                //
+                // Invoke "debug painting" (press "p" in the console, choose the
+                // "Toggle Debug Paint" action from the Flutter Inspector in Android
+                // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+                // to see the wireframe for each widget.
+                //
+                // Column has various properties to control how it sizes itself and
+                // how it positions its children. Here we use mainAxisAlignment to
+                // center the children vertically; the main axis here is the vertical
+                // axis because Columns are vertical (the cross axis would be
+                // horizontal).
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'HBPM: $_counter',
+                    style: TextStyle(
+                      fontSize: 20
+                    ),
+                  ),
+                  // Text(
+                  //   '$_counter',
+                  //   style: Theme.of(context).textTheme.headline4,
+                  // ),
+                ],
+              ),
+            );
+          }
+
+          return CircularProgressIndicator();
+        }
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -140,4 +157,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+Future<bool> appReady() async {
+  await HealthKitReporter.requestAuthorization([QuantityType.heartRate.identifier, QuantityType.heartRateVariabilitySDNN.identifier, SeriesType.heartbeatSeries.identifier], []);
+  final enableBackground = await HealthKitReporter.enableBackgroundDelivery(QuantityType.heartRate.identifier, UpdateFrequency.immediate);
+  print('Ready to stream in background: $enableBackground');
+
+  return true;
 }
